@@ -1,0 +1,17 @@
+config BR2_PACKAGE_CAT_GIF
+    bool "cat_gif"
+    depends on !BR2_STATIC_LIBS
+    depends on BR2_USE_WCHAR
+    depends on BR2_TOOLCHAIN_HAS_THREADS
+    select BR2_PACKAGE_SDL3
+    select BR2_PACKAGE_SDL3_IMAGE
+    help
+        This app displays gifs (of cats, hopefully) on a
+        screen available through some renderer SDL3 may
+        use. gifs are sourced from a user-config'd directory
+
+        The target needs an SDL3 video render. On RPI,
+        enable BR2_PACKAGE_SDL3_KMSDRM (with Mesa).
+    
+comment "cat_gif, b/c of SDL3: needs dynamic libs, threads, and wchar support"
+    depends on BR2_STATIC_LIBS || !BR2_TOOLCHAIN_HAS_THREADS || !BR2_USE_WCHAR

@@ -10,19 +10,28 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIGURATION>")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/$<CONFIGURATION>")
 
-# This assumes the SDL source is available in vendored/SDL
-add_subdirectory(vendored/SDL EXCLUDE_FROM_ALL)
+# ON: use SDL3 / SDL3_image already installed in the sysroot (Buildroot, distro
+# packages). OFF: build the copies vendored as git submodules (desktop builds).
+option(CATGIF_SYSTEM_SDL "Use system SDL3 and SDL3_image instead of vendored copies" OFF)
 
-# SDL_image, with only the GIF decoder enabled (it has no external dependencies).
-set(SDLIMAGE_VENDORED ON CACHE BOOL "" FORCE)
-set(SDLIMAGE_SAMPLES OFF CACHE BOOL "" FORCE)
-set(SDLIMAGE_TESTS OFF CACHE BOOL "" FORCE)
-set(SDLIMAGE_INSTALL OFF CACHE BOOL "" FORCE)
-foreach(fmt ANI AVIF BMP JPG JXL LBM PCX PNG PNM QOI SVG TGA TIF WEBP XCF XPM XV)
-    set(SDLIMAGE_${fmt} OFF CACHE BOOL "" FORCE)
-endforeach()
-set(SDLIMAGE_GIF ON CACHE BOOL "" FORCE)
-add_subdirectory(vendored/SDL_image EXCLUDE_FROM_ALL)
+if(CATGIF_SYSTEM_SDL)
+    find_package(SDL3 REQUIRED CONFIG)
+    find_package(SDL3_image REQUIRED CONFIG)
+else()
+    # This assumes the SDL source is available in vendored/SDL
+    add_subdirectory(vendored/SDL EXCLUDE_FROM_ALL)
+
+    # SDL_image, with only the GIF decoder enabled (it has no external dependencies).
+    set(SDLIMAGE_VENDORED ON CACHE BOOL "" FORCE)
+    set(SDLIMAGE_SAMPLES OFF CACHE BOOL "" FORCE)
+    set(SDLIMAGE_TESTS OFF CACHE BOOL "" FORCE)
+    set(SDLIMAGE_INSTALL OFF CACHE BOOL "" FORCE)
+    foreach(fmt ANI AVIF BMP JPG JXL LBM PCX PNG PNM QOI SVG TGA TIF WEBP XCF XPM XV)
+        set(SDLIMAGE_${fmt} OFF CACHE BOOL "" FORCE)
+    endforeach()
+    set(SDLIMAGE_GIF ON CACHE BOOL "" FORCE)
+    add_subdirectory(vendored/SDL_image EXCLUDE_FROM_ALL)
+endif()
 
 add_executable(cat_gif
     main.cpp
@@ -38,3 +47,8 @@ if(EXISTS "${CMAKE_SOURCE_DIR}/fallback.gif")
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
                 "${CMAKE_SOURCE_DIR}/fallback.gif" "$<TARGET_FILE_DIR:cat_gif>/fallback.gif")
 endif()
+
+# Install the executable (used by "make install" and by Buildroot's cmake-package).
+# https://cmake.org/cmake/help/latest/module/GNUInstallDirs.html
+include(GNUInstallDirs)
+install(TARGETS cat_gif RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
