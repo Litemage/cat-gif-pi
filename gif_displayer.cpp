@@ -6,9 +6,9 @@ namespace fs = std::filesystem;
 
 namespace {
 
-constexpr const char* kStorageMessage = "No USB or misconfigured new/ or used/ dir";
+constexpr const char* kStorageMessage = "Misconfigured, empty, or missing new/ or used/ dir";
 constexpr const char* kCriticalMessage =
-    "Critical: no GIF file found, and fallback GIF missing or corrupted";
+    "Critical: misconfigured, missing or empty used/new dirs, and fallback GIF missing or corrupted";
 
 }  // namespace
 
