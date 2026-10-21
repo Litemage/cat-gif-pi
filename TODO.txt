@@ -1,0 +1,6 @@
+- [ ] Set a root password
+- [ ] Add udisks
+- [ ] Configure NTP
+- [ ] Remove log files (no rotation, could continuously grow unbounded (slowly))
+- [ ] Add help to program
+- [ ] Users should be able to configure directories at runtime

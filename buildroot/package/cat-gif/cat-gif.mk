@@ -35,6 +35,13 @@ CAT_GIF_DEPENDENCIES = sdl3 sdl3_image
 # for outside of buildroot, it uses the vendored copies that are submodules.
 CAT_GIF_CONF_OPTS = -DCATGIF_SYSTEM_SDL=ON
 
+# Auto-start at boot (BusyBox init). Buildroot runs this hook only when the init
+# system is sysv/busybox. CAT_GIF_PKGDIR is this package's directory.
+define CAT_GIF_INSTALL_INIT_SYSV
+	$(INSTALL) -D -m 0755 $(CAT_GIF_PKGDIR)/S99cat-gif \
+		$(TARGET_DIR)/etc/init.d/S99cat-gif
+endef
+
 # Generate the build rules for a CMake-based target package. It configures with
 # the cross toolchain file, builds, and runs "make install" into the target
 # directory, so CMakeLists.txt needs an install() rule for the executable.

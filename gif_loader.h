@@ -15,7 +15,9 @@ struct GifConfig {
     // Local files, relative to the directory the EXE runs in.
     std::filesystem::path cacheFile = "current_gif.txt";
     std::filesystem::path localCopy = "current.gif";
-    std::filesystem::path fallbackGif = "fallback.gif";
+
+    // Installed by CMake (see install() in CMakeLists.txt); absolute, not cwd-relative.
+    std::filesystem::path fallbackGif = "/usr/share/cat-gif/fallback.gif";
 };
 
 enum class StorageStatus {

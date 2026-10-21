@@ -52,3 +52,9 @@ endif()
 # https://cmake.org/cmake/help/latest/module/GNUInstallDirs.html
 include(GNUInstallDirs)
 install(TARGETS cat_gif RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+# The program loads fallback.gif at runtime, so ship it with the executable.
+if(EXISTS "${CMAKE_SOURCE_DIR}/fallback.gif")
+    install(FILES "${CMAKE_SOURCE_DIR}/fallback.gif"
+            DESTINATION ${CMAKE_INSTALL_DATADIR}/cat-gif)
+endif()

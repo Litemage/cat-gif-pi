@@ -3,6 +3,8 @@ config BR2_PACKAGE_CAT_GIF
     depends on !BR2_STATIC_LIBS
     depends on BR2_USE_WCHAR
     depends on BR2_TOOLCHAIN_HAS_THREADS
+    depends on BR2_INSTALL_LIBSTDCPP
+    depends on BR2_PACKAGE_SDL3_KMSDRM
     select BR2_PACKAGE_SDL3
     select BR2_PACKAGE_SDL3_IMAGE
     help
@@ -10,8 +12,10 @@ config BR2_PACKAGE_CAT_GIF
         screen available through some renderer SDL3 may
         use. gifs are sourced from a user-config'd directory
 
-        The target needs an SDL3 video render. On RPI,
-        enable BR2_PACKAGE_SDL3_KMSDRM (with Mesa).
+        This app leaves the choice of SDL renderer up to the
+        configurer. For a pi3b+, we recommend enabling
+        BR2_PACKAGE_MESA3D_GALLIUM_DRIVER_VC4.
+        For other platforms: you're on your own getting SDL3 a render to use.
     
-comment "cat_gif, b/c of SDL3: needs dynamic libs, threads, and wchar support"
-    depends on BR2_STATIC_LIBS || !BR2_TOOLCHAIN_HAS_THREADS || !BR2_USE_WCHAR
+comment "cat_gif, b/c of SDL3: needs dynamic libs, threads, cpp17, sdl-kmsdrm and wchar support"
+    depends on BR2_STATIC_LIBS || !BR2_TOOLCHAIN_HAS_THREADS || !BR2_USE_WCHAR || !BR2_INSTALL_LIBSTDCPP || !BR2_PACKAGE_SDL3_KMSDRM

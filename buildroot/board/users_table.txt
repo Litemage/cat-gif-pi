@@ -1,0 +1,1 @@
+gifuser -2 gifuser -2 =changeme /home/gifuser /bin/sh video,input,audio GIF viewer user

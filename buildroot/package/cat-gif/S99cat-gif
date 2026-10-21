@@ -1,0 +1,58 @@
+#!/bin/sh
+#
+# Starts the cat_gif GIF display application.
+#
+
+# Allow a few customizations from a config file
+test -r /etc/default/cat-gif && . /etc/default/cat-gif
+
+DAEMON=/usr/bin/cat_gif
+PIDFILE=/var/run/cat-gif.pid
+
+# cat_gif keeps current.gif and current_gif.txt in its working directory, and
+# takes the new/used GIF directories as arguments.
+WORKDIR=${CAT_GIF_WORKDIR:-/var/lib/cat-gif}
+NEW_DIR=${CAT_GIF_NEW_DIR:-$WORKDIR/gifs/new}
+USED_DIR=${CAT_GIF_USED_DIR:-$WORKDIR/gifs/used}
+
+start() {
+	printf "Starting cat_gif: "
+	mkdir -p "$WORKDIR" "$NEW_DIR" "$USED_DIR"
+
+	# udev loads the vc4 DRM driver asynchronously during boot, so wait for
+	# /dev/dri/card0 inside the background job rather than delaying boot.
+	CMD="i=0; while [ ! -e /dev/dri/card0 ] && [ \$i -lt 30 ]; do sleep 1; i=\$((i+1)); done;"
+	CMD="$CMD cd $WORKDIR && exec $DAEMON $NEW_DIR $USED_DIR"
+
+	start-stop-daemon -S -q -b -m -p "$PIDFILE" -x /bin/sh -- -c "$CMD"
+	[ $? = 0 ] && echo "OK" || echo "FAIL"
+}
+
+stop() {
+	printf "Stopping cat_gif: "
+	start-stop-daemon -K -q -p "$PIDFILE"
+	[ $? = 0 ] && echo "OK" || echo "FAIL"
+	rm -f "$PIDFILE"
+}
+
+restart() {
+	stop
+	start
+}
+
+case "$1" in
+	start)
+		start
+		;;
+	stop)
+		stop
+		;;
+	restart|reload)
+		restart
+		;;
+	*)
+		echo "Usage: $0 {start|stop|restart}"
+		exit 1
+esac
+
+exit $?
