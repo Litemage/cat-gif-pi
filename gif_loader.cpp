@@ -44,7 +44,40 @@ std::tm localTime(std::chrono::system_clock::time_point tp)
     return tm;
 }
 
+std::string trim(const std::string& s)
+{
+    const char* ws = " \t\r\n";
+    const auto first = s.find_first_not_of(ws);
+    if (first == std::string::npos) {
+        return "";
+    }
+    return s.substr(first, s.find_last_not_of(ws) - first + 1);
+}
+
 }  // namespace
+
+bool loadConfigFile(GifConfig& config)
+{
+    std::ifstream in(config.configFile);
+    if (!in) {
+        return false;
+    }
+    std::vector<std::string> values;
+    std::string line;
+    while (values.size() < 2 && std::getline(in, line)) {
+        line = trim(line);
+        if (!line.empty() && line[0] != '#') {
+            values.push_back(line);
+        }
+    }
+    if (!values.empty()) {
+        config.newDir = values[0];
+    }
+    if (values.size() > 1) {
+        config.usedDir = values[1];
+    }
+    return true;
+}
 
 GifLoader::GifLoader(GifConfig config, Clock clock)
     : config_(std::move(config)), clock_(std::move(clock))
@@ -269,6 +302,20 @@ bool GifLoader::update()
         return false;
     }
     return pickNext();
+}
+
+bool GifLoader::reloadConfig()
+{
+    GifConfig updated = config_;
+    if (!loadConfigFile(updated)) {
+        return false;  // file gone: keep using the last known directories
+    }
+    if (updated.newDir == config_.newDir && updated.usedDir == config_.usedDir) {
+        return false;
+    }
+    config_.newDir = updated.newDir;
+    config_.usedDir = updated.usedDir;
+    return true;
 }
 
 bool GifLoader::rotate()

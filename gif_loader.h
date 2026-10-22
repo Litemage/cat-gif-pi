@@ -8,7 +8,11 @@
 #include <vector>
 
 struct GifConfig {
-    // Directories on the (removable) USB stick.
+    // Text file naming the directories below (see loadConfigFile). Absolute so the
+    // init script and a bare "cat_gif" invocation agree.
+    std::filesystem::path configFile = "/etc/cat-gif.conf";
+
+    // Directories on the (removable) USB stick; overridden by configFile.
     std::filesystem::path newDir = "gifs/new";
     std::filesystem::path usedDir = "gifs/used";
 
@@ -19,6 +23,12 @@ struct GifConfig {
     // Installed by CMake (see install() in CMakeLists.txt); absolute, not cwd-relative.
     std::filesystem::path fallbackGif = "/usr/share/cat-gif/fallback.gif";
 };
+
+// Reads config.configFile: first line is the "new" directory, second the "used"
+// directory. Blank lines and lines starting with '#' are skipped, surrounding
+// whitespace is trimmed. Lines that are missing leave the existing value alone, so
+// a missing or short file keeps the defaults. Returns true if the file was read.
+bool loadConfigFile(GifConfig& config);
 
 enum class StorageStatus {
     Ok,
@@ -43,6 +53,9 @@ public:
 
     // Forces a rotation to the next GIF. Returns true if the local copy was replaced.
     bool rotate();
+
+    // Re-reads the config file. Returns true if the new/used directories changed.
+    bool reloadConfig();
 
     StorageStatus status() const { return status_; }
     const GifConfig& config() const { return config_; }

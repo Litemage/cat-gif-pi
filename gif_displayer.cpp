@@ -202,12 +202,13 @@ void GifDisplayer::run()
             }
         }
 
-        // Periodic upkeep: 7AM rotation, USB retries, pending moves.
+        // Periodic upkeep: config edits, 7AM rotation, USB retries, pending moves.
         if (now - lastTick >= kTickIntervalMs) {
             lastTick = now;
+            const bool dirsChanged = loader_.reloadConfig();
             // Also retry loading when nothing is displayable, in case
             // the USB stick came back.
-            if (loader_.update() || critical_) {
+            if (loader_.update() || dirsChanged || critical_) {
                 reload();
             }
         }
